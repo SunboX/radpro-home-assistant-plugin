@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 import voluptuous as vol
@@ -32,24 +33,54 @@ except ImportError:  # pragma: no cover - handled at runtime by requirements
     list_ports = None
 
 
-def _list_serial_ports() -> list[str]:
+@dataclass(frozen=True)
+class _DetectedPort:
+    device: str
+    label: str
+
+
+def _is_radpro_port(port) -> bool:
+    if port.vid is not None and port.pid is not None:
+        if (port.vid, port.pid) in RADPRO_VIDPID:
+            return True
+    text = " ".join(
+        item for item in (port.product, port.description, port.manufacturer) if item
+    ).lower()
+    return "rad pro" in text or "radpro" in text
+
+
+def _port_label(port) -> str:
+    details: list[str] = []
+    if port.product:
+        details.append(port.product)
+    elif port.description and port.description != port.device:
+        details.append(port.description)
+    elif port.manufacturer:
+        details.append(port.manufacturer)
+    if port.vid is not None and port.pid is not None:
+        details.append(f"{port.vid:04x}:{port.pid:04x}")
+    if details:
+        return f"{port.device} ({', '.join(details)})"
+    return port.device
+
+
+def _list_radpro_ports() -> list[_DetectedPort]:
     if list_ports is None:
         return []
-    ports = []
+    ports: list[_DetectedPort] = []
+    seen: set[str] = set()
     for port in list_ports.comports():
-        ports.append(port.device)
-    return sorted(set(ports))
-
-
-def _suggested_port(ports: list[str]) -> str | None:
-    if list_ports is None:
-        return None
-    for port in list_ports.comports():
-        if port.vid is None or port.pid is None:
+        if not _is_radpro_port(port):
             continue
-        if (port.vid, port.pid) in RADPRO_VIDPID:
-            return port.device
-    return ports[0] if ports else None
+        if not port.device or port.device in seen:
+            continue
+        seen.add(port.device)
+        ports.append(_DetectedPort(device=port.device, label=_port_label(port)))
+    return sorted(ports, key=lambda item: item.device)
+
+
+def _suggested_port(ports: list[_DetectedPort]) -> str | None:
+    return ports[0].device if ports else None
 
 
 def _parse_commands(raw: str) -> list[str]:
@@ -83,11 +114,14 @@ class RadProConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             title = f"Rad Pro ({port})"
             return self.async_create_entry(title=title, data=data, options=options)
 
-        ports = await self.hass.async_add_executor_job(_list_serial_ports)
+        ports = await self.hass.async_add_executor_job(_list_radpro_ports)
         suggested = _suggested_port(ports)
         if ports:
+            options = [{"value": port.device, "label": port.label} for port in ports]
             port_selector = selector.SelectSelector(
-                selector.SelectSelectorConfig(options=ports, mode=selector.SelectSelectorMode.DROPDOWN)
+                selector.SelectSelectorConfig(
+                    options=options, mode=selector.SelectSelectorMode.DROPDOWN
+                )
             )
         else:
             port_selector = str

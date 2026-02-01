@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Connect Rad Pro",
-        "description": "Pick the USB serial port and polling settings.",
+        "description": "Pick the Rad Pro USB serial port and polling settings. Only detected Rad Pro devices are shown.",
         "data": {
           "port": "Serial port",
           "baudrate": "Baud rate",
