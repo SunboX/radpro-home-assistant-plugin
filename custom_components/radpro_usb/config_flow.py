@@ -130,7 +130,9 @@ class RadProConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Required(CONF_PORT, default=suggested or ""): port_selector,
                 vol.Required(CONF_BAUDRATE, default=DEFAULT_BAUDRATE): int,
-                vol.Required(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): float,
+                vol.Required(
+                    CONF_TIMEOUT, default=DEFAULT_TIMEOUT
+                ): vol.Coerce(float),
                 vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
                 vol.Required(CONF_COMMANDS, default=",".join(DEFAULT_COMMANDS)): str,
                 vol.Required(
