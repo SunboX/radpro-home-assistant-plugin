@@ -20,6 +20,7 @@ from .const import (
     DEFAULT_DISABLED_KEYS,
     DOMAIN,
     KNOWN_COMMANDS,
+    SENSOR_TRANSLATION_KEYS,
     CommandInfo,
 )
 from .coordinator import RadProCoordinator
@@ -32,6 +33,7 @@ _CAMEL_RE = re.compile(r"([a-z])([A-Z])")
 class _RadProEntityMeta:
     key: str
     info: CommandInfo
+    translation_key: str | None = None
     suggested_precision: int | None = None
 
 
@@ -109,10 +111,13 @@ async def async_setup_entry(
         if command in BINARY_SENSOR_KEYS:
             continue
         info = _command_info(command)
+        translation_key = SENSOR_TRANSLATION_KEYS.get(command)
         entities.append(
             RadProSensor(
                 coordinator=coordinator,
-                meta=_RadProEntityMeta(key=command, info=info),
+                meta=_RadProEntityMeta(
+                    key=command, info=info, translation_key=translation_key
+                ),
                 port=port,
                 entry_id=entry.entry_id,
                 name_prefix=entry.title,
@@ -137,7 +142,10 @@ async def async_setup_entry(
                 RadProSensor(
                     coordinator=coordinator,
                     meta=_RadProEntityMeta(
-                        key=key, info=info, suggested_precision=precision
+                        key=key,
+                        info=info,
+                        translation_key=SENSOR_TRANSLATION_KEYS.get(key),
+                        suggested_precision=precision,
                     ),
                     port=port,
                     entry_id=entry.entry_id,
@@ -174,7 +182,10 @@ class RadProSensor(CoordinatorEntity[RadProCoordinator], SensorEntity):
         self._key = meta.key
         self._info = meta.info
         self._attr_unique_id = f"{entry_id}_{self._key}"
-        self._attr_name = self._info.name
+        if meta.translation_key:
+            self._attr_translation_key = meta.translation_key
+        else:
+            self._attr_name = self._info.name
         self._attr_icon = self._info.icon
         self._attr_native_unit_of_measurement = self._info.unit
         self._attr_state_class = _state_class(self._info.state_class)

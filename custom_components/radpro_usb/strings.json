@@ -15,6 +15,32 @@
       }
     }
   },
+  "entity": {
+    "sensor": {
+      "device_id": { "name": "Device ID" },
+      "device_model": { "name": "Device Model" },
+      "device_firmware": { "name": "Device Firmware" },
+      "device_locale": { "name": "Device Locale" },
+      "device_battery_voltage": { "name": "Battery Voltage" },
+      "device_battery": { "name": "Battery" },
+      "device_time": { "name": "Device Time" },
+      "device_time_zone": { "name": "Device Time Zone" },
+      "tube_sensitivity": { "name": "Tube Sensitivity" },
+      "tube_lifetime": { "name": "Tube Lifetime" },
+      "tube_dead_time": { "name": "Tube Dead Time" },
+      "tube_dead_time_compensation": { "name": "Tube Dead Time Compensation" },
+      "tube_hv_frequency": { "name": "Tube HV Frequency" },
+      "tube_hv_duty_cycle": { "name": "Tube HV Duty Cycle" },
+      "tube_pulse_count": { "name": "Tube Pulse Count" },
+      "tube_rate": { "name": "Tube Rate" },
+      "tube_dose_rate": { "name": "Dose Rate" },
+      "derived_cps": { "name": "Derived CPS" },
+      "derived_cpm": { "name": "Derived CPM" }
+    },
+    "binary_sensor": {
+      "device_power": { "name": "Power" }
+    }
+  },
   "options": {
     "step": {
       "init": {

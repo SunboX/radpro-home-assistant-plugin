@@ -14,6 +14,32 @@
       }
     }
   },
+  "entity": {
+    "sensor": {
+      "device_id": { "name": "Geräte-ID" },
+      "device_model": { "name": "Gerätemodell" },
+      "device_firmware": { "name": "Geräte-Firmware" },
+      "device_locale": { "name": "Geräte-Sprache" },
+      "device_battery_voltage": { "name": "Batteriespannung" },
+      "device_battery": { "name": "Batterie" },
+      "device_time": { "name": "Gerätezeit" },
+      "device_time_zone": { "name": "Zeitzone" },
+      "tube_sensitivity": { "name": "Röhrenempfindlichkeit" },
+      "tube_lifetime": { "name": "Röhrenlaufzeit" },
+      "tube_dead_time": { "name": "Röhren-Totzeit" },
+      "tube_dead_time_compensation": { "name": "Totzeit-Kompensation" },
+      "tube_hv_frequency": { "name": "Röhren-HV-Frequenz" },
+      "tube_hv_duty_cycle": { "name": "Röhren-HV-Tastverhältnis" },
+      "tube_pulse_count": { "name": "Röhrenimpulse" },
+      "tube_rate": { "name": "Röhrenrate" },
+      "tube_dose_rate": { "name": "Dosisleistung" },
+      "derived_cps": { "name": "Abgeleitete CPS" },
+      "derived_cpm": { "name": "Abgeleitete CPM" }
+    },
+    "binary_sensor": {
+      "device_power": { "name": "Stromversorgung" }
+    }
+  },
   "options": {
     "step": {
       "init": {

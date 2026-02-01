@@ -15,6 +15,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     BINARY_SENSOR_KEYS,
+    BINARY_SENSOR_TRANSLATION_KEYS,
     CONF_PORT,
     DOMAIN,
     KNOWN_BINARY_SENSORS,
@@ -29,6 +30,7 @@ class _RadProBinaryMeta:
     device_class: str | None
     icon: str | None
     entity_category: str | None
+    translation_key: str | None = None
 
 
 def _command_meta(command: str) -> _RadProBinaryMeta:
@@ -56,6 +58,7 @@ def _command_meta(command: str) -> _RadProBinaryMeta:
         device_class=info.device_class,
         icon=info.icon,
         entity_category=info.entity_category,
+        translation_key=BINARY_SENSOR_TRANSLATION_KEYS.get(command),
     )
 
 
@@ -121,7 +124,10 @@ class RadProBinarySensor(
         super().__init__(coordinator)
         self._key = meta.key
         self._attr_unique_id = f"{entry_id}_{self._key}"
-        self._attr_name = meta.name
+        if meta.translation_key:
+            self._attr_translation_key = meta.translation_key
+        else:
+            self._attr_name = meta.name
         if meta.device_class:
             self._attr_device_class = BinarySensorDeviceClass(meta.device_class)
         self._attr_icon = meta.icon

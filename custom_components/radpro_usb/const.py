@@ -95,6 +95,33 @@ STATIC_VALUE_KEYS: Final = {
     "tubeHvFrequency",
     "tubeHvDutyCycle",
 }
+
+# Translation keys for entity names (used for localization).
+SENSOR_TRANSLATION_KEYS: Final = {
+    "deviceId": "device_id",
+    "deviceModel": "device_model",
+    "deviceFirmware": "device_firmware",
+    "deviceLocale": "device_locale",
+    "deviceBatteryVoltage": "device_battery_voltage",
+    "deviceBatteryPercent": "device_battery",
+    "deviceTime": "device_time",
+    "deviceTimeZone": "device_time_zone",
+    "tubeSensitivity": "tube_sensitivity",
+    "tubeLifetime": "tube_lifetime",
+    "tubeDeadTime": "tube_dead_time",
+    "tubeDeadTimeCompensation": "tube_dead_time_compensation",
+    "tubeHvFrequency": "tube_hv_frequency",
+    "tubeHvDutyCycle": "tube_hv_duty_cycle",
+    "tubePulseCount": "tube_pulse_count",
+    "tubeRate": "tube_rate",
+    "tubeDoseRate": "tube_dose_rate",
+    DERIVED_CPS_KEY: "derived_cps",
+    DERIVED_CPM_KEY: "derived_cpm",
+}
+
+BINARY_SENSOR_TRANSLATION_KEYS: Final = {
+    "devicePower": "device_power",
+}
 DEFAULT_ENABLE_DERIVED: Final = False
 
 RADPRO_VIDPID: Final = {
