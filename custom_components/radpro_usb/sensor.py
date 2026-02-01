@@ -89,6 +89,37 @@ def _state_class(value: str | None) -> SensorStateClass | None:
     return None
 
 
+def _format_lifetime_ymdm(seconds: float | int) -> str:
+    """Format tube lifetime seconds into years, months, days, minutes.
+
+    Args:
+        seconds: Lifetime in seconds.
+
+    Returns:
+        Human-readable duration (e.g., "1y 2mo 3d 4m").
+    """
+    # Use fixed 365-day years and 30-day months for readability.
+    total_minutes = int(seconds // 60)
+    minutes_per_day = 60 * 24
+    minutes_per_month = minutes_per_day * 30
+    minutes_per_year = minutes_per_day * 365
+
+    years, remainder = divmod(total_minutes, minutes_per_year)
+    months, remainder = divmod(remainder, minutes_per_month)
+    days, minutes = divmod(remainder, minutes_per_day)
+
+    parts: list[str] = []
+    if years:
+        parts.append(f"{years}y")
+    if months:
+        parts.append(f"{months}mo")
+    if days:
+        parts.append(f"{days}d")
+    if minutes or not parts:
+        parts.append(f"{minutes}m")
+    return " ".join(parts)
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -220,4 +251,7 @@ class RadProSensor(CoordinatorEntity[RadProCoordinator], SensorEntity):
         """Return the latest native value for this sensor."""
         if not self.coordinator.data:
             return None
-        return self.coordinator.data.values.get(self._key)
+        value = self.coordinator.data.values.get(self._key)
+        if self._key == "tubeLifetime" and isinstance(value, (int, float)):
+            return _format_lifetime_ymdm(value)
+        return value

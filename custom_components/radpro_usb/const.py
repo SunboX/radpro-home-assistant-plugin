@@ -259,7 +259,7 @@ KNOWN_COMMANDS: Final = {
     ),
     "tubeLifetime": CommandInfo(
         name="Tube Lifetime",
-        unit="s",
+        unit=None,
         state_class=None,
         device_class=None,
         icon="mdi:timer-sand",
