@@ -11,7 +11,8 @@ from .const import (
     CONF_PORT,
     CONF_SCAN_INTERVAL,
     CONF_TIMEOUT,
-    DEFAULT_QUERY_COMMANDS,
+    DEFAULT_POLL_COMMANDS,
+    DEFAULT_STATIC_COMMANDS,
     DEFAULT_SENSOR_KEYS,
     DEFAULT_ENABLE_DERIVED,
     DEFAULT_SCAN_INTERVAL,
@@ -38,10 +39,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_TIMEOUT: entry.data[CONF_TIMEOUT],
         CONF_SCAN_INTERVAL: entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
         CONF_ENABLE_DERIVED: entry.options.get(
-            CONF_ENABLE_DERIVED, DEFAULT_ENABLE_DERIVED
-        ),
+        CONF_ENABLE_DERIVED, DEFAULT_ENABLE_DERIVED
+    ),
         # Keep command and sensor sets aligned with the bridge MQTT payloads.
-        "query_commands": DEFAULT_QUERY_COMMANDS,
+        "poll_commands": DEFAULT_POLL_COMMANDS,
+        "static_commands": DEFAULT_STATIC_COMMANDS,
         "sensor_keys": DEFAULT_SENSOR_KEYS,
     }
 

@@ -15,8 +15,11 @@ from .const import (
     CONF_ENABLE_DERIVED,
     CONF_SCAN_INTERVAL,
     COMMAND_KEY_MAP,
+    DEFAULT_POLL_COMMANDS,
+    DEFAULT_STATIC_COMMANDS,
     DERIVED_CPM_KEY,
     DERIVED_CPS_KEY,
+    STATIC_VALUE_KEYS,
 )
 from .radpro_serial import RadProError, RadProSerial
 
@@ -42,7 +45,13 @@ class RadProCoordinator(DataUpdateCoordinator[RadProData]):
             entry_data: Prepared configuration data for polling.
         """
         self._device = device
-        self._query_commands: list[str] = entry_data["query_commands"]
+        self._poll_commands: list[str] = entry_data.get(
+            "poll_commands", DEFAULT_POLL_COMMANDS
+        )
+        self._static_commands: list[str] = entry_data.get(
+            "static_commands", DEFAULT_STATIC_COMMANDS
+        )
+        self._static_completed: set[str] = set()
         self._enable_derived = entry_data[CONF_ENABLE_DERIVED]
         self._last_pulse_count: int | None = None
         self._last_pulse_timestamp: float | None = None
@@ -79,7 +88,7 @@ class RadProCoordinator(DataUpdateCoordinator[RadProData]):
             A dict of Home Assistant-friendly keys and values.
         """
         values: dict[str, float | int | str | bool | datetime] = {}
-        for command in self._query_commands:
+        for command in self._poll_commands:
             try:
                 response = self._device.query(f"GET {command}")
                 raw = response.raw
@@ -89,8 +98,9 @@ class RadProCoordinator(DataUpdateCoordinator[RadProData]):
                     values.update(_parse_device_id(cleaned))
                     continue
                 if command == "deviceTimeZone":
-                    if cleaned:
-                        values["deviceTimeZone"] = cleaned
+                    parsed_zone = _parse_device_timezone(cleaned)
+                    if parsed_zone:
+                        values["deviceTimeZone"] = parsed_zone
                     continue
                 if command == "deviceTime":
                     parsed = _parse_device_time(cleaned, response.value)
@@ -111,6 +121,55 @@ class RadProCoordinator(DataUpdateCoordinator[RadProData]):
                 values[key] = value
             except RadProError as err:
                 _LOGGER.debug("Rad Pro command %s failed: %s", command, err)
+
+        for command in self._static_commands:
+            if command in self._static_completed:
+                continue
+            try:
+                response = self._device.query(f"GET {command}")
+                raw = response.raw
+                cleaned = _clean_response(raw)
+                success = False
+
+                if command == "deviceId":
+                    parsed = _parse_device_id(cleaned)
+                    if parsed:
+                        values.update(parsed)
+                        success = True
+                elif command == "deviceTimeZone":
+                    parsed_zone = _parse_device_timezone(cleaned)
+                    if parsed_zone:
+                        values["deviceTimeZone"] = parsed_zone
+                        success = True
+                elif command == "deviceTime":
+                    parsed = _parse_device_time(cleaned, response.value)
+                    if parsed is not None:
+                        values["deviceTime"] = parsed
+                        success = True
+                elif command == "devicePower":
+                    parsed = _parse_device_power(cleaned, response.value)
+                    if parsed is not None:
+                        values["devicePower"] = parsed
+                        success = True
+                else:
+                    key = COMMAND_KEY_MAP.get(command, command)
+                    value: Any = response.value
+                    if isinstance(value, str) and cleaned:
+                        value = cleaned
+                    if value is not None:
+                        values[key] = value
+                        success = True
+
+                if success:
+                    self._static_completed.add(command)
+            except RadProError as err:
+                _LOGGER.debug("Rad Pro command %s failed: %s", command, err)
+
+        # Keep the last known static values to avoid flapping to unavailable.
+        if self.data:
+            for key, value in self.data.values.items():
+                if key in STATIC_VALUE_KEYS and key not in values:
+                    values[key] = value
 
         # Mirror bridge behavior for computed metrics.
         _update_battery_percent(values)
@@ -265,6 +324,37 @@ def _parse_device_power(payload: str, fallback: Any) -> bool | None:
     if upper in {"0", "OFF", "FALSE"}:
         return False
     return None
+
+
+def _parse_device_timezone(payload: str) -> str | None:
+    """Normalize device time zone strings.
+
+    Args:
+        payload: Raw time zone payload from the device.
+
+    Returns:
+        A normalized time zone string (e.g., UTC+01:00) or the original
+        string when it already looks like a named time zone.
+    """
+    if not payload:
+        return None
+    trimmed = payload.strip()
+    if not trimmed:
+        return None
+    try:
+        offset = float(trimmed)
+    except ValueError:
+        # Keep named or already-formatted time zones intact.
+        return trimmed
+    # Convert numeric offsets into an explicit UTC±HH:MM string.
+    sign = "+" if offset >= 0 else "-"
+    abs_offset = abs(offset)
+    hours = int(abs_offset)
+    minutes = int(round((abs_offset - hours) * 60))
+    if minutes == 60:
+        hours += 1
+        minutes = 0
+    return f"UTC{sign}{hours:02d}:{minutes:02d}"
 
 
 def _update_battery_percent(

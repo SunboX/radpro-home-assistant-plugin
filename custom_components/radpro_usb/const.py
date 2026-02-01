@@ -18,10 +18,14 @@ DEFAULT_BAUDRATE: Final = 115200
 DEFAULT_TIMEOUT: Final = 1.0
 DEFAULT_SCAN_INTERVAL: Final = 5
 # Query list mirrors the WiFi bridge MQTT publish set.
-DEFAULT_QUERY_COMMANDS: Final = [
+DEFAULT_POLL_COMMANDS: Final = [
+    "deviceBatteryVoltage",
+    "tubePulseCount",
+    "tubeRate",
+]
+DEFAULT_STATIC_COMMANDS: Final = [
     "deviceId",
     "devicePower",
-    "deviceBatteryVoltage",
     "deviceTime",
     "deviceTimeZone",
     "tubeSensitivity",
@@ -30,10 +34,8 @@ DEFAULT_QUERY_COMMANDS: Final = [
     "tubeDeadTimeCompensation",
     "tubeHVFrequency",
     "tubeHVDutyCycle",
-    "tubePulseCount",
-    "tubeRate",
 ]
-DEFAULT_COMMANDS: Final = DEFAULT_QUERY_COMMANDS
+DEFAULT_COMMANDS: Final = DEFAULT_POLL_COMMANDS + DEFAULT_STATIC_COMMANDS
 
 # Map raw command names to the keys exposed as HA sensors.
 COMMAND_KEY_MAP: Final = {
@@ -76,6 +78,23 @@ DEFAULT_SENSOR_KEYS: Final = [
 BINARY_SENSOR_KEYS: Final = {"devicePower"}
 # Avoid cluttering the activity log with fast-changing diagnostics.
 DEFAULT_DISABLED_KEYS: Final = {"deviceTime"}
+
+# Static values should retain their last value even if we skip re-polling.
+STATIC_VALUE_KEYS: Final = {
+    "deviceId",
+    "deviceModel",
+    "deviceFirmware",
+    "deviceLocale",
+    "devicePower",
+    "deviceTime",
+    "deviceTimeZone",
+    "tubeSensitivity",
+    "tubeLifetime",
+    "tubeDeadTime",
+    "tubeDeadTimeCompensation",
+    "tubeHvFrequency",
+    "tubeHvDutyCycle",
+}
 DEFAULT_ENABLE_DERIVED: Final = False
 
 RADPRO_VIDPID: Final = {
