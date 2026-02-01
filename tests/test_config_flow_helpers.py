@@ -8,7 +8,12 @@ import pytest
 
 pytest.importorskip("homeassistant")
 
-from custom_components.radpro_usb.config_flow import _is_radpro_port, _port_label
+from custom_components.radpro_usb.config_flow import (
+    _is_radpro_port,
+    _port_label,
+    _timeout_field,
+)
+from homeassistant.helpers import selector as ha_selector
 from custom_components.radpro_usb.const import RADPRO_VIDPID
 
 
@@ -63,3 +68,12 @@ def test_port_label_falls_back_to_device() -> None:
     """Return the device path when no details exist."""
     port = _StubPort(device="/dev/ttyUSB2")
     assert _port_label(port) == "/dev/ttyUSB2"
+
+
+def test_timeout_field_compatibility() -> None:
+    """Return a selector or validator without raising."""
+    field = _timeout_field()
+    if hasattr(ha_selector, "NumberSelector"):
+        assert field is not None
+    else:
+        assert callable(field)

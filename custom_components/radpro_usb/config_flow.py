@@ -115,6 +115,26 @@ def _suggested_port(ports: list[_DetectedPort]) -> str | None:
     return ports[0].device if ports else None
 
 
+def _timeout_field():
+    """Return a timeout field compatible with multiple HA selector versions.
+
+    Returns:
+        A NumberSelector when available, otherwise a float coercion validator.
+    """
+    if hasattr(selector, "NumberSelector") and hasattr(selector, "NumberSelectorConfig"):
+        mode = getattr(getattr(selector, "NumberSelectorMode", None), "BOX", None)
+        if mode is not None:
+            return selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    step=0.1,
+                    mode=mode,
+                    unit_of_measurement="s",
+                )
+            )
+    # Fallback for older Home Assistant versions without NumberSelector.
+    return vol.Coerce(float)
+
+
 class RadProConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Rad Pro USB."""
 
@@ -159,13 +179,7 @@ class RadProConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
         else:
             port_selector = str
-        timeout_selector = selector.NumberSelector(
-            selector.NumberSelectorConfig(
-                step=0.1,
-                mode=selector.NumberSelectorMode.BOX,
-                unit_of_measurement="s",
-            )
-        )
+        timeout_selector = _timeout_field()
 
         data_schema = vol.Schema(
             {
