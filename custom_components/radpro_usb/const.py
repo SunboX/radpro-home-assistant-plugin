@@ -79,6 +79,9 @@ BINARY_SENSOR_KEYS: Final = {"devicePower"}
 # Avoid cluttering the activity log with fast-changing diagnostics.
 DEFAULT_DISABLED_KEYS: Final = {"deviceTime"}
 
+DERIVED_CPS_KEY: Final = "derived_cps"
+DERIVED_CPM_KEY: Final = "derived_cpm"
+
 # Static values should retain their last value even if we skip re-polling.
 STATIC_VALUE_KEYS: Final = {
     "deviceId",
@@ -308,6 +311,3 @@ KNOWN_BINARY_SENSORS: Final = {
         value_type=bool,
     )
 }
-
-DERIVED_CPS_KEY: Final = "derived_cps"
-DERIVED_CPM_KEY: Final = "derived_cpm"
