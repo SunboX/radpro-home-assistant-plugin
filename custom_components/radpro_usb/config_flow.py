@@ -125,14 +125,19 @@ class RadProConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
         else:
             port_selector = str
+        timeout_selector = selector.NumberSelector(
+            selector.NumberSelectorConfig(
+                step=0.1,
+                mode=selector.NumberSelectorMode.BOX,
+                unit_of_measurement="s",
+            )
+        )
 
         data_schema = vol.Schema(
             {
                 vol.Required(CONF_PORT, default=suggested or ""): port_selector,
                 vol.Required(CONF_BAUDRATE, default=DEFAULT_BAUDRATE): int,
-                vol.Required(
-                    CONF_TIMEOUT, default=DEFAULT_TIMEOUT
-                ): vol.Coerce(float),
+                vol.Required(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): timeout_selector,
                 vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): int,
                 vol.Required(CONF_COMMANDS, default=",".join(DEFAULT_COMMANDS)): str,
                 vol.Required(
