@@ -46,6 +46,8 @@ class RadProCoordinator(DataUpdateCoordinator[RadProData]):
         self._enable_derived = entry_data[CONF_ENABLE_DERIVED]
         self._last_pulse_count: int | None = None
         self._last_pulse_timestamp: float | None = None
+        self._last_cps: float | None = None
+        self._last_cpm: float | None = None
         super().__init__(
             hass,
             _LOGGER,
@@ -125,6 +127,10 @@ class RadProCoordinator(DataUpdateCoordinator[RadProData]):
         Args:
             values: Current values dict (mutated in place).
         """
+        # Preserve the last computed values to avoid flapping to 0.0 between pulses.
+        if self._last_cps is not None and self._last_cpm is not None:
+            values[DERIVED_CPS_KEY] = self._last_cps
+            values[DERIVED_CPM_KEY] = self._last_cpm
         pulse = values.get("tubePulseCount")
         if not isinstance(pulse, (int, float)):
             return
@@ -134,12 +140,25 @@ class RadProCoordinator(DataUpdateCoordinator[RadProData]):
             self._last_pulse_timestamp = now
             return
         delta_count = int(pulse) - self._last_pulse_count
+        if delta_count < 0:
+            # Counter reset or rollover; reset baseline without changing displayed values.
+            self._last_pulse_count = int(pulse)
+            self._last_pulse_timestamp = now
+            return
+        if delta_count == 0:
+            # No new pulses; keep prior derived values.
+            return
         delta_time = now - self._last_pulse_timestamp
         if delta_time <= 0:
             return
         cps = delta_count / delta_time
+        # Round to limit excessive decimals in the UI.
+        cps = round(cps, 3)
+        cpm = round(cps * 60, 2)
         values[DERIVED_CPS_KEY] = cps
-        values[DERIVED_CPM_KEY] = cps * 60
+        values[DERIVED_CPM_KEY] = cpm
+        self._last_cps = cps
+        self._last_cpm = cpm
         self._last_pulse_count = int(pulse)
         self._last_pulse_timestamp = now
 

@@ -74,6 +74,8 @@ DEFAULT_SENSOR_KEYS: Final = [
 ]
 
 BINARY_SENSOR_KEYS: Final = {"devicePower"}
+# Avoid cluttering the activity log with fast-changing diagnostics.
+DEFAULT_DISABLED_KEYS: Final = {"deviceTime"}
 DEFAULT_ENABLE_DERIVED: Final = False
 
 RADPRO_VIDPID: Final = {

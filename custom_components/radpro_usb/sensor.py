@@ -17,6 +17,7 @@ from .const import (
     CONF_PORT,
     DERIVED_CPM_KEY,
     DERIVED_CPS_KEY,
+    DEFAULT_DISABLED_KEYS,
     DOMAIN,
     KNOWN_COMMANDS,
     CommandInfo,
@@ -31,6 +32,7 @@ _CAMEL_RE = re.compile(r"([a-z])([A-Z])")
 class _RadProEntityMeta:
     key: str
     info: CommandInfo
+    suggested_precision: int | None = None
 
 
 def _titleize(command: str) -> str:
@@ -119,9 +121,9 @@ async def async_setup_entry(
 
     if coordinator.enable_derived:
         # Derived sensors are opt-in because they are computed, not device-reported.
-        for key, name, unit in (
-            (DERIVED_CPS_KEY, "Derived CPS", "CPS"),
-            (DERIVED_CPM_KEY, "Derived CPM", "CPM"),
+        for key, name, unit, precision in (
+            (DERIVED_CPS_KEY, "Derived CPS", "CPS", 3),
+            (DERIVED_CPM_KEY, "Derived CPM", "CPM", 2),
         ):
             info = CommandInfo(
                 name=name,
@@ -134,7 +136,9 @@ async def async_setup_entry(
             entities.append(
                 RadProSensor(
                     coordinator=coordinator,
-                    meta=_RadProEntityMeta(key=key, info=info),
+                    meta=_RadProEntityMeta(
+                        key=key, info=info, suggested_precision=precision
+                    ),
                     port=port,
                     entry_id=entry.entry_id,
                     name_prefix=entry.title,
@@ -176,6 +180,10 @@ class RadProSensor(CoordinatorEntity[RadProCoordinator], SensorEntity):
         self._attr_state_class = _state_class(self._info.state_class)
         if self._info.entity_category:
             self._attr_entity_category = EntityCategory(self._info.entity_category)
+        if self._key in DEFAULT_DISABLED_KEYS:
+            self._attr_entity_registry_enabled_default = False
+        if meta.suggested_precision is not None:
+            self._attr_suggested_display_precision = meta.suggested_precision
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry_id)},
             name=name_prefix,
