@@ -2,6 +2,8 @@
 
 Custom Home Assistant integration that reads a Rad Pro device over USB serial and exposes sensor entities similar to the MQTT payloads used by the `radpro-wifi-bridge` project.
 
+This project builds on the excellent open-source Rad Pro firmware from https://github.com/Gissio/radpro.
+
 ## Features
 - Polls a Rad Pro device connected via USB serial.
 - Creates sensors for each configured command (default: `tubeRate`, `tubePulseCount`, `doseRate`).
