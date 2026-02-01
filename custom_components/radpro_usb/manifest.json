@@ -1,0 +1,10 @@
+{
+  "domain": "radpro_usb",
+  "name": "Rad Pro USB",
+  "config_flow": true,
+  "documentation": "https://github.com/afiedler/radpro-home-assistant-plugin",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "requirements": ["pyserial==3.5"],
+  "version": "0.1.0"
+}
