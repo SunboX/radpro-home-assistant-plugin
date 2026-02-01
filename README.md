@@ -6,7 +6,7 @@ Custom Home Assistant integration that reads a Rad Pro device over USB serial an
 - Polls a Rad Pro device connected via USB serial.
 - Creates sensors for each configured command (default: `tubeRate`, `tubePulseCount`, `doseRate`).
 - Optional derived CPS/CPM sensors based on `tubePulseCount`.
-- Config flow with options to change commands and polling interval.
+- Config flow with polling interval and derived sensor toggle.
 
 ## Installation
 
@@ -28,20 +28,21 @@ From the UI config flow you will be asked for:
 - Baud rate (default `115200`).
 - Serial timeout in seconds (default `1.0`).
 - Polling interval in seconds (default `5`).
-- Commands (comma-separated).
 - Whether to enable derived CPS/CPM sensors.
 
-### Commands
-The default command list is:
-```
-tubeRate,tubePulseCount,doseRate
-```
-If your device firmware does not support a command, remove it from the list in the integration options.
-
 ## Sensors
+- **Power** (`devicePower`) - on/off status.
+- **Battery Voltage** (`deviceBatteryVoltage`) - volts.
+- **Battery** (`deviceBatteryPercent`) - percentage.
 - **Tube Rate** (`tubeRate`) - counts per minute (CPM).
 - **Tube Pulse Count** (`tubePulseCount`) - cumulative pulses.
-- **Dose Rate** (`doseRate`) - uSv/h when supported by firmware.
+- **Dose Rate** (`tubeDoseRate`) - uSv/h (computed from tube rate + sensitivity).
+- **Tube Sensitivity** (`tubeSensitivity`) - cpm/uSv/h.
+- **Tube Dead Time** (`tubeDeadTime`) - seconds.
+- **Tube Dead Time Compensation** (`tubeDeadTimeCompensation`) - seconds.
+- **Tube HV Frequency** (`tubeHvFrequency`) - Hz.
+- **Tube HV Duty Cycle** (`tubeHvDutyCycle`) - ratio.
+- **Device info** (`deviceId`, `deviceModel`, `deviceFirmware`, `deviceLocale`, `deviceTime`, `deviceTimeZone`) - diagnostics.
 - **Derived CPS/CPM** (optional) - calculated from pulse count deltas.
 
 ## Troubleshooting
@@ -59,4 +60,4 @@ logger:
 ```
 
 ## Disclaimer
-This integration relies on the Rad Pro serial command interface. If your device uses different commands or baud rate, adjust the integration options accordingly.
+This integration relies on the Rad Pro serial command interface. If your device uses a different baud rate, adjust the integration options accordingly.

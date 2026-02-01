@@ -36,6 +36,14 @@ class RadProSerial:
         timeout: float,
         eol: str = "\r\n",
     ) -> None:
+        """Initialize the serial client.
+
+        Args:
+            port: Serial device path.
+            baudrate: Baud rate for the connection.
+            timeout: Read/write timeout in seconds.
+            eol: Line ending to append to commands.
+        """
         self._port = port
         self._baudrate = baudrate
         self._timeout = timeout
@@ -45,16 +53,20 @@ class RadProSerial:
 
     @property
     def port(self) -> str:
+        """Return the configured serial port path."""
         return self._port
 
     def close(self) -> None:
+        """Close the serial port if it is open."""
         with self._lock:
             if self._serial and self._serial.is_open:
                 self._serial.close()
 
     def _ensure_open(self) -> None:
+        """Open the serial port if it is not already open."""
         if self._serial and self._serial.is_open:
             return
+        # Use write timeout to avoid blocking forever on cable issues.
         self._serial = serial.Serial(
             self._port,
             self._baudrate,
@@ -63,6 +75,18 @@ class RadProSerial:
         )
 
     def query(self, command: str, max_lines: int = 6) -> RadProResponse:
+        """Send a command and parse the first usable response line.
+
+        Args:
+            command: Command string without EOL.
+            max_lines: Maximum number of response lines to scan.
+
+        Returns:
+            Parsed RadProResponse with raw line and value.
+
+        Raises:
+            RadProError: When communication fails or no response is parsed.
+        """
         with self._lock:
             try:
                 self._ensure_open()
@@ -109,10 +133,26 @@ class RadProSerial:
             raise RadProError("No response")
 
     def query_value(self, command: str) -> RadProResponse:
+        """Convenience wrapper for query().
+
+        Args:
+            command: Command string without EOL.
+
+        Returns:
+            Parsed RadProResponse.
+        """
         return self.query(command)
 
     @staticmethod
     def _parse_value(line: str) -> Any:
+        """Parse a numeric value from a response line when possible.
+
+        Args:
+            line: Raw line from the device.
+
+        Returns:
+            int, float, or the original string when no number is found.
+        """
         match = NUMBER_RE.search(line)
         if not match:
             return line

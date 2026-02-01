@@ -9,7 +9,6 @@
           "baudrate": "Baud rate",
           "timeout": "Serial timeout (seconds)",
           "scan_interval": "Polling interval (seconds)",
-          "commands": "Commands (comma-separated)",
           "enable_derived": "Enable derived CPS/CPM sensors"
         }
       }
@@ -21,7 +20,6 @@
         "title": "Rad Pro options",
         "data": {
           "scan_interval": "Polling interval (seconds)",
-          "commands": "Commands (comma-separated)",
           "enable_derived": "Enable derived CPS/CPM sensors"
         }
       }

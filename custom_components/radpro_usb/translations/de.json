@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Rad Pro verbinden",
+        "description": "Wähle den Rad Pro USB-Seriellport und die Abfrageeinstellungen. Es werden nur erkannte Rad-Pro-Geräte angezeigt.",
+        "data": {
+          "port": "Serieller Port",
+          "baudrate": "Baudrate",
+          "timeout": "Serielles Timeout (Sekunden)",
+          "scan_interval": "Abfrageintervall (Sekunden)",
+          "enable_derived": "Abgeleitete CPS/CPM-Sensoren aktivieren"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Rad Pro Optionen",
+        "data": {
+          "scan_interval": "Abfrageintervall (Sekunden)",
+          "enable_derived": "Abgeleitete CPS/CPM-Sensoren aktivieren"
+        }
+      }
+    }
+  }
+}
