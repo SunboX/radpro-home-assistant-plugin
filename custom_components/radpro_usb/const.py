@@ -243,7 +243,7 @@ KNOWN_COMMANDS: Final = {
     ),
     "tubeDoseRate": CommandInfo(
         name="Dose Rate",
-        unit="uSv/h",
+        unit="µSv/h",
         state_class="measurement",
         device_class=None,
         icon="mdi:radioactive",
@@ -251,7 +251,7 @@ KNOWN_COMMANDS: Final = {
     ),
     "tubeSensitivity": CommandInfo(
         name="Tube Sensitivity",
-        unit="cpm/uSv/h",
+        unit="cpm/µSv/h",
         state_class=None,
         device_class=None,
         icon="mdi:tune-vertical",

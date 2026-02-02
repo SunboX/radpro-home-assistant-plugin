@@ -38,8 +38,8 @@ From the UI config flow you will be asked for:
 - **Battery** (`deviceBatteryPercent`) - percentage.
 - **Tube Rate** (`tubeRate`) - counts per minute (CPM).
 - **Tube Pulse Count** (`tubePulseCount`) - cumulative pulses.
-- **Dose Rate** (`tubeDoseRate`) - uSv/h (computed from tube rate + sensitivity).
-- **Tube Sensitivity** (`tubeSensitivity`) - cpm/uSv/h.
+- **Dose Rate** (`tubeDoseRate`) - µSv/h (computed from tube rate + sensitivity).
+- **Tube Sensitivity** (`tubeSensitivity`) - cpm/µSv/h.
 - **Tube Dead Time** (`tubeDeadTime`) - seconds.
 - **Tube Dead Time Compensation** (`tubeDeadTimeCompensation`) - seconds.
 - **Tube HV Frequency** (`tubeHvFrequency`) - Hz.
