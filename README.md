@@ -61,5 +61,10 @@ logger:
     custom_components.radpro_usb: debug
 ```
 
+## License
+The code in this repository is licensed under PolyForm Noncommercial 1.0.0.
+
+See [LICENSE.md](LICENSE.md) for the license text and [NOTICE](NOTICE) for the required attribution notice that must be passed along with the software.
+
 ## Disclaimer
 This integration relies on the Rad Pro serial command interface. If your device uses a different baud rate, adjust the integration options accordingly.
