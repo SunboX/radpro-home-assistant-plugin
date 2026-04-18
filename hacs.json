@@ -1,6 +1,4 @@
 {
   "name": "Rad Pro USB",
-  "render_readme": true,
-  "domains": ["sensor", "binary_sensor"],
-  "iot_class": "local_polling"
+  "render_readme": true
 }
