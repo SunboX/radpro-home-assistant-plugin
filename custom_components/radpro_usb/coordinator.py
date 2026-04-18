@@ -254,7 +254,8 @@ def _parse_device_id(payload: str) -> dict[str, str]:
         return {}
     parts = [part.strip() for part in payload.split(";")]
     result: dict[str, str] = {}
-    if parts:
+    # Treat a single-part fallback payload as a bare device ID.
+    if len(parts) >= 2:
         if len(parts[0]):
             result["deviceModel"] = parts[0]
     if len(parts) >= 3:

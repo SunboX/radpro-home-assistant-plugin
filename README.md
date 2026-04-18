@@ -12,11 +12,15 @@ This project builds on the excellent open-source Rad Pro firmware from https://g
 
 ## Installation
 
-### HACS (custom repository)
-1. In HACS, add this repository as a custom integration.
-2. Install **Rad Pro USB**.
-3. Restart Home Assistant.
-4. Add the integration from **Settings → Devices & Services**.
+### HACS
+If this repository is already available in the default HACS store, search for **Rad Pro USB** in HACS and install it directly.
+
+If the default-store inclusion is still pending, add it as a custom integration first:
+1. In HACS, open the top-right menu and select **Custom repositories**.
+2. Add `https://github.com/SunboX/radpro-home-assistant-plugin` as an **Integration** repository.
+3. Install **Rad Pro USB**.
+4. Restart Home Assistant.
+5. Add the integration from **Settings → Devices & Services**.
 
 ### Manual
 1. Copy `custom_components/radpro_usb` into your Home Assistant `config/custom_components` directory.
@@ -51,6 +55,7 @@ From the UI config flow you will be asked for:
 - Make sure Home Assistant can access the serial device (use `/dev/serial/by-id` when possible).
 - Ensure no other process is using the serial device.
 - Turn on debug logging for `custom_components.radpro_usb` to inspect raw responses.
+- Report issues at https://github.com/SunboX/radpro-home-assistant-plugin/issues.
 
 ## Logging
 Add to `configuration.yaml`:

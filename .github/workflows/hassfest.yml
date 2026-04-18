@@ -1,0 +1,22 @@
+name: Validate with Hassfest
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hassfest:
+    runs-on: ubuntu-latest
+    steps:
+      # Hassfest reads the integration files from the checked-out repository.
+      - name: Check out repository
+        uses: actions/checkout@v4
+      # Validate manifest metadata, translations, and general custom integration structure.
+      - name: Run Hassfest
+        uses: home-assistant/actions/hassfest@master

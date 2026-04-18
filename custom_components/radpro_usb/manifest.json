@@ -1,10 +1,10 @@
 {
   "domain": "radpro_usb",
   "name": "Rad Pro USB",
+  "codeowners": ["@SunboX"],
   "config_flow": true,
-  "documentation": "https://github.com/afiedler/radpro-home-assistant-plugin",
-  "icon": "icon.png",
-  "logo": "logo.png",
+  "documentation": "https://github.com/SunboX/radpro-home-assistant-plugin",
+  "issue_tracker": "https://github.com/SunboX/radpro-home-assistant-plugin/issues",
   "integration_type": "device",
   "iot_class": "local_polling",
   "requirements": ["pyserial==3.5"],
