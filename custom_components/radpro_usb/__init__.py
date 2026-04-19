@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import (
     CONF_BAUDRATE,
+    CONF_DEVICE_ID,
     CONF_ENABLE_DERIVED,
     CONF_PORT,
     CONF_SCAN_INTERVAL,
@@ -19,9 +21,91 @@ from .const import (
     DOMAIN,
 )
 from .coordinator import RadProCoordinator
-from .radpro_serial import RadProSerial
+from .identity import (
+    RadProDeviceIdentity,
+    describe_entry_updates,
+    list_radpro_ports,
+    resolve_device_identity,
+)
+from .radpro_serial import RadProError, RadProSerial
 
 PLATFORMS: list[str] = ["sensor", "binary_sensor"]
+
+
+def _stored_device_id(entry: ConfigEntry) -> str | None:
+    """Return the stable physical counter ID stored for a config entry.
+
+    Args:
+        entry: Config entry being set up.
+
+    Returns:
+        Stored Rad Pro ``deviceId`` or ``None`` for legacy port-based entries.
+    """
+    stored = entry.data.get(CONF_DEVICE_ID)
+    if isinstance(stored, str) and stored:
+        return stored
+
+    # Legacy versions used the serial path as the unique ID.
+    if isinstance(entry.unique_id, str) and entry.unique_id != entry.data.get(CONF_PORT):
+        return entry.unique_id
+    return None
+
+
+def _resolve_identity_for_entry(entry: ConfigEntry) -> RadProDeviceIdentity:
+    """Resolve the currently attached port for a configured physical counter.
+
+    Args:
+        entry: Config entry being set up.
+
+    Returns:
+        Resolved physical identity including the current serial path.
+    """
+    detected_ports = [port.device for port in list_radpro_ports()]
+    return resolve_device_identity(
+        saved_port=entry.data[CONF_PORT],
+        saved_device_id=_stored_device_id(entry),
+        baudrate=entry.data[CONF_BAUDRATE],
+        timeout=entry.data[CONF_TIMEOUT],
+        detected_ports=detected_ports,
+    )
+
+
+async def _async_prepare_entry_identity(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+) -> RadProDeviceIdentity:
+    """Resolve and persist the physical counter identity for a config entry.
+
+    Args:
+        hass: Home Assistant instance.
+        entry: Config entry being set up.
+
+    Returns:
+        Resolved physical identity including the current serial path.
+
+    Raises:
+        ConfigEntryNotReady: When the configured counter cannot be found.
+    """
+    try:
+        identity = await hass.async_add_executor_job(_resolve_identity_for_entry, entry)
+    except RadProError as err:
+        raise ConfigEntryNotReady(str(err)) from err
+
+    updates = describe_entry_updates(
+        data=entry.data,
+        unique_id=entry.unique_id,
+        title=entry.title,
+        identity=identity,
+    )
+    if updates is not None:
+        # Persist the stable physical identity and any changed USB path in one update.
+        hass.config_entries.async_update_entry(
+            entry,
+            data=updates["data"],
+            unique_id=updates["unique_id"],
+            title=updates["title"],
+        )
+    return identity
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -34,13 +118,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     Returns:
         True when setup succeeds.
     """
+    identity = await _async_prepare_entry_identity(hass, entry)
     data = {
         CONF_BAUDRATE: entry.data[CONF_BAUDRATE],
         CONF_TIMEOUT: entry.data[CONF_TIMEOUT],
         CONF_SCAN_INTERVAL: entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
         CONF_ENABLE_DERIVED: entry.options.get(
-        CONF_ENABLE_DERIVED, DEFAULT_ENABLE_DERIVED
-    ),
+            CONF_ENABLE_DERIVED, DEFAULT_ENABLE_DERIVED
+        ),
         # Keep command and sensor sets aligned with the bridge MQTT payloads.
         "poll_commands": DEFAULT_POLL_COMMANDS,
         "static_commands": DEFAULT_STATIC_COMMANDS,
@@ -48,7 +133,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     device = RadProSerial(
-        port=entry.data[CONF_PORT],
+        port=identity.port,
         baudrate=entry.data[CONF_BAUDRATE],
         timeout=entry.data[CONF_TIMEOUT],
     )
@@ -58,6 +143,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
         "coordinator": coordinator,
         "device": device,
+        "device_id": identity.device_id,
+        "port": identity.port,
         "sensor_keys": data["sensor_keys"],
     }
 

@@ -16,7 +16,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import (
     BINARY_SENSOR_KEYS,
     BINARY_SENSOR_TRANSLATION_KEYS,
-    CONF_PORT,
     DOMAIN,
     KNOWN_BINARY_SENSORS,
 )
@@ -76,8 +75,9 @@ async def async_setup_entry(
     """
     entry_data = hass.data[DOMAIN][entry.entry_id]
     coordinator: RadProCoordinator = entry_data["coordinator"]
+    device_id: str = entry_data["device_id"]
+    port: str = entry_data["port"]
     sensor_keys: list[str] = entry_data["sensor_keys"]
-    port: str = entry.data[CONF_PORT]
 
     entities: list[RadProBinarySensor] = []
     for command in sensor_keys:
@@ -88,6 +88,7 @@ async def async_setup_entry(
             RadProBinarySensor(
                 coordinator=coordinator,
                 meta=meta,
+                device_id=device_id,
                 port=port,
                 entry_id=entry.entry_id,
                 name_prefix=entry.title,
@@ -108,6 +109,7 @@ class RadProBinarySensor(
         self,
         coordinator: RadProCoordinator,
         meta: _RadProBinaryMeta,
+        device_id: str,
         port: str,
         entry_id: str,
         name_prefix: str,
@@ -117,6 +119,7 @@ class RadProBinarySensor(
         Args:
             coordinator: Shared data coordinator.
             meta: Metadata for the command key.
+            device_id: Stable physical counter identifier.
             port: Serial device path.
             entry_id: Config entry ID.
             name_prefix: Device name prefix for the entity.
@@ -133,15 +136,19 @@ class RadProBinarySensor(
         self._attr_icon = meta.icon
         if meta.entity_category:
             self._attr_entity_category = EntityCategory(meta.entity_category)
+        device_model = "USB"
+        if self.coordinator.data:
+            device_model = str(self.coordinator.data.values.get("deviceModel", "USB"))
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry_id)},
+            identifiers={(DOMAIN, device_id)},
             name=name_prefix,
             manufacturer="Rad Pro",
-            model="USB",
+            model=device_model,
             configuration_url=None,
             suggested_area="Lab",
         )
         self._attr_extra_state_attributes = {
+            "device_id": device_id,
             "port": port,
             "command": self._key,
         }

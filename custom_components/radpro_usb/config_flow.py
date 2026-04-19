@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Any
 
 import voluptuous as vol
@@ -13,6 +12,7 @@ from homeassistant.helpers import selector
 
 from .const import (
     CONF_BAUDRATE,
+    CONF_DEVICE_ID,
     CONF_ENABLE_DERIVED,
     CONF_PORT,
     CONF_SCAN_INTERVAL,
@@ -22,97 +22,17 @@ from .const import (
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_TIMEOUT,
     DOMAIN,
-    RADPRO_VIDPID,
 )
-
-try:
-    from serial.tools import list_ports
-except ImportError:  # pragma: no cover - handled at runtime by requirements
-    list_ports = None
-
-
-@dataclass(frozen=True)
-class _DetectedPort:
-    device: str
-    label: str
-
-
-def _is_radpro_port(port) -> bool:
-    """Return True if the serial port looks like a Rad Pro device.
-
-    Args:
-        port: pyserial ListPortInfo-like object with USB metadata.
-
-    Returns:
-        True when VID/PID or descriptors match Rad Pro patterns.
-    """
-    # Prefer VID/PID allowlist to avoid false positives.
-    if port.vid is not None and port.pid is not None:
-        if (port.vid, port.pid) in RADPRO_VIDPID:
-            return True
-    # Fallback to product/description heuristics for adapters without VID/PID.
-    text = " ".join(
-        item for item in (port.product, port.description, port.manufacturer) if item
-    ).lower()
-    return "rad pro" in text or "radpro" in text
-
-
-def _port_label(port) -> str:
-    """Build a user-friendly label for a serial port.
-
-    Args:
-        port: pyserial ListPortInfo-like object.
-
-    Returns:
-        A label including device path and identifying details.
-    """
-    # Prefer product name, then description, then manufacturer.
-    details: list[str] = []
-    if port.product:
-        details.append(port.product)
-    elif port.description and port.description != port.device:
-        details.append(port.description)
-    elif port.manufacturer:
-        details.append(port.manufacturer)
-    # Append VID/PID for quick identification in UI.
-    if port.vid is not None and port.pid is not None:
-        details.append(f"{port.vid:04x}:{port.pid:04x}")
-    if details:
-        return f"{port.device} ({', '.join(details)})"
-    return port.device
-
-
-def _list_radpro_ports() -> list[_DetectedPort]:
-    """Enumerate Rad Pro serial ports with labels.
-
-    Returns:
-        A sorted list of detected Rad Pro ports.
-    """
-    if list_ports is None:
-        return []
-    ports: list[_DetectedPort] = []
-    seen: set[str] = set()
-    for port in list_ports.comports():
-        if not _is_radpro_port(port):
-            continue
-        if not port.device or port.device in seen:
-            continue
-        # Deduplicate by device path to avoid duplicate entries.
-        seen.add(port.device)
-        ports.append(_DetectedPort(device=port.device, label=_port_label(port)))
-    return sorted(ports, key=lambda item: item.device)
-
-
-def _suggested_port(ports: list[_DetectedPort]) -> str | None:
-    """Return a suggested port value for the config flow.
-
-    Args:
-        ports: Detected Rad Pro ports.
-
-    Returns:
-        The first port device path, or None.
-    """
-    return ports[0].device if ports else None
+from .identity import (
+    DetectedPort as _DetectedPort,
+    device_title,
+    is_radpro_port as _is_radpro_port,
+    list_radpro_ports as _list_radpro_ports,
+    port_label as _port_label,
+    probe_device_identity,
+    suggested_port as _suggested_port,
+)
+from .radpro_serial import RadProError
 
 
 def _timeout_field():
@@ -153,20 +73,36 @@ class RadProConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             port = user_input[CONF_PORT]
-            await self.async_set_unique_id(port)
-            self._abort_if_unique_id_configured()
+            baudrate = user_input[CONF_BAUDRATE]
+            timeout = user_input[CONF_TIMEOUT]
+            try:
+                identity = await self.hass.async_add_executor_job(
+                    probe_device_identity,
+                    port,
+                    baudrate,
+                    timeout,
+                )
+            except RadProError:
+                errors["base"] = "cannot_connect"
+            else:
+                await self.async_set_unique_id(identity.device_id)
+                self._abort_if_unique_id_configured()
 
-            options = {
-                CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
-                CONF_ENABLE_DERIVED: user_input[CONF_ENABLE_DERIVED],
-            }
-            data = {
-                CONF_PORT: port,
-                CONF_BAUDRATE: user_input[CONF_BAUDRATE],
-                CONF_TIMEOUT: user_input[CONF_TIMEOUT],
-            }
-            title = f"Rad Pro ({port})"
-            return self.async_create_entry(title=title, data=data, options=options)
+                options = {
+                    CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
+                    CONF_ENABLE_DERIVED: user_input[CONF_ENABLE_DERIVED],
+                }
+                data = {
+                    CONF_PORT: port,
+                    CONF_BAUDRATE: baudrate,
+                    CONF_TIMEOUT: timeout,
+                    CONF_DEVICE_ID: identity.device_id,
+                }
+                return self.async_create_entry(
+                    title=device_title(identity.device_id),
+                    data=data,
+                    options=options,
+                )
 
         ports = await self.hass.async_add_executor_job(_list_radpro_ports)
         suggested = _suggested_port(ports)

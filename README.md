@@ -6,6 +6,8 @@ This project builds on the excellent open-source Rad Pro firmware from https://g
 
 ## Features
 - Polls a Rad Pro device connected via USB serial.
+- Supports multiple attached Rad Pro counters as separate Home Assistant entries.
+- Tracks each configured counter by `deviceId`, so replugging to another USB path does not require reconfiguration after migration.
 - Creates sensors for each configured command (default: `tubeRate`, `tubePulseCount`, `doseRate`).
 - Optional derived CPS/CPM sensors based on `tubePulseCount`.
 - Config flow with polling interval and derived sensor toggle.
@@ -36,6 +38,10 @@ From the UI config flow you will be asked for:
 - Polling interval in seconds (default `5`).
 - Whether to enable derived CPS/CPM sensors.
 
+Each config entry represents one physical Rad Pro counter. Starting with `1.0.0`, the integration stores the device's `deviceId` and automatically rebinds the entry if that same counter appears on a different USB path later.
+
+Existing installs are migrated automatically on the first successful connection after upgrading to `1.0.0`.
+
 ## Sensors
 - **Power** (`devicePower`) - on/off status.
 - **Battery Voltage** (`deviceBatteryVoltage`) - volts.
@@ -54,6 +60,7 @@ From the UI config flow you will be asked for:
 ## Troubleshooting
 - Make sure Home Assistant can access the serial device (use `/dev/serial/by-id` when possible).
 - Ensure no other process is using the serial device.
+- If an upgraded entry does not follow a moved counter yet, reconnect the original device once so `1.0.0` can migrate it from port-based identity to `deviceId`.
 - Turn on debug logging for `custom_components.radpro_usb` to inspect raw responses.
 - Report issues at https://github.com/SunboX/radpro-home-assistant-plugin/issues.
 

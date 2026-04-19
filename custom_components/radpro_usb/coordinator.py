@@ -21,6 +21,7 @@ from .const import (
     DERIVED_CPS_KEY,
     STATIC_VALUE_KEYS,
 )
+from .identity import clean_response, parse_device_id_payload
 from .radpro_serial import RadProError, RadProSerial
 
 _LOGGER = logging.getLogger(__name__)
@@ -235,10 +236,7 @@ def _clean_response(raw: str) -> str:
     Returns:
         Trimmed response without a leading "OK " prefix.
     """
-    trimmed = raw.strip()
-    if trimmed.upper().startswith("OK "):
-        trimmed = trimmed[3:]
-    return trimmed.strip()
+    return clean_response(raw)
 
 
 def _parse_device_id(payload: str) -> dict[str, str]:
@@ -250,37 +248,7 @@ def _parse_device_id(payload: str) -> dict[str, str]:
     Returns:
         A dict with deviceModel, deviceFirmware, deviceLocale, and deviceId.
     """
-    if not payload:
-        return {}
-    parts = [part.strip() for part in payload.split(";")]
-    result: dict[str, str] = {}
-    # Treat a single-part fallback payload as a bare device ID.
-    if len(parts) >= 2:
-        if len(parts[0]):
-            result["deviceModel"] = parts[0]
-    if len(parts) >= 3:
-        firmware_locale = parts[1]
-        if firmware_locale:
-            if "/" in firmware_locale:
-                firmware, locale = firmware_locale.split("/", 1)
-                firmware = firmware.strip()
-                locale = locale.strip()
-                if firmware:
-                    result["deviceFirmware"] = firmware
-                if locale:
-                    result["deviceLocale"] = locale
-            else:
-                result["deviceFirmware"] = firmware_locale
-    device_id = ""
-    if len(parts) >= 3:
-        device_id = parts[2]
-    elif len(parts) == 2:
-        device_id = parts[1]
-    elif len(parts) == 1:
-        device_id = parts[0]
-    if device_id:
-        result["deviceId"] = device_id
-    return result
+    return parse_device_id_payload(payload)
 
 
 def _parse_device_time(payload: str, fallback: Any) -> datetime | None:

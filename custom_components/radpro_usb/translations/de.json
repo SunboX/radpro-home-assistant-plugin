@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Rad Pro verbinden",
-        "description": "Wähle den Rad Pro USB-Seriellport und die Abfrageeinstellungen. Es werden nur erkannte Rad-Pro-Geräte angezeigt.",
+        "description": "Wähle den Rad Pro USB-Seriellport und die Abfrageeinstellungen. Jeder Eintrag verfolgt genau einen physischen Zähler per Geräte-ID und folgt ihm auch bei einem geänderten USB-Pfad.",
         "data": {
           "port": "Serieller Port",
           "baudrate": "Baudrate",
@@ -12,6 +12,9 @@
           "enable_derived": "Abgeleitete CPS/CPM-Sensoren aktivieren"
         }
       }
+    },
+    "error": {
+      "cannot_connect": "Verbindung zum ausgewählten Rad-Pro-Gerät fehlgeschlagen."
     }
   },
   "entity": {

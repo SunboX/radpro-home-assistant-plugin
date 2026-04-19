@@ -5,6 +5,8 @@ Home Assistant custom integration for reading Rad Pro devices over USB serial.
 ## Features
 
 - Polls a Rad Pro device connected over USB serial.
+- Supports multiple attached counters as separate Home Assistant entries.
+- Tracks each entry by the physical counter `deviceId` and automatically follows USB path changes after migration.
 - Exposes Rad Pro measurements as Home Assistant sensor and binary sensor entities.
 - Includes a config flow with configurable polling and optional derived CPS/CPM sensors.
 
@@ -28,3 +30,5 @@ You will be asked for:
 - Baud rate and serial timeout.
 - Polling interval.
 - Whether derived CPS/CPM sensors should be created.
+
+Each added entry represents one physical counter.

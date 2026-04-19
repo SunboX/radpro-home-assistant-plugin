@@ -7,6 +7,8 @@
 4. Restart Home Assistant.
 5. Add **Rad Pro USB** from **Settings → Devices & Services**.
 
+Each added entry represents one physical Rad Pro counter. Add the integration once per attached counter.
+
 ## Manual
 1. Copy `custom_components/radpro_usb` into your Home Assistant configuration directory.
 2. Restart Home Assistant.

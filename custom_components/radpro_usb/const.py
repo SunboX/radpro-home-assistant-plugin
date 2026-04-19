@@ -13,6 +13,7 @@ CONF_SCAN_INTERVAL: Final = "scan_interval"
 CONF_COMMANDS: Final = "commands"
 CONF_ENABLE_DERIVED: Final = "enable_derived"
 CONF_PORT: Final = "port"
+CONF_DEVICE_ID: Final = "device_id"
 
 DEFAULT_BAUDRATE: Final = 115200
 DEFAULT_TIMEOUT: Final = 1.0

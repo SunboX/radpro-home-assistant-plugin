@@ -14,7 +14,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     BINARY_SENSOR_KEYS,
-    CONF_PORT,
     DERIVED_CPM_KEY,
     DERIVED_CPS_KEY,
     DEFAULT_DISABLED_KEYS,
@@ -134,8 +133,9 @@ async def async_setup_entry(
     """
     entry_data = hass.data[DOMAIN][entry.entry_id]
     coordinator: RadProCoordinator = entry_data["coordinator"]
+    device_id: str = entry_data["device_id"]
+    port: str = entry_data["port"]
     sensor_keys: list[str] = entry_data["sensor_keys"]
-    port: str = entry.data[CONF_PORT]
 
     entities: list[RadProSensor] = []
     for command in sensor_keys:
@@ -149,6 +149,7 @@ async def async_setup_entry(
                 meta=_RadProEntityMeta(
                     key=command, info=info, translation_key=translation_key
                 ),
+                device_id=device_id,
                 port=port,
                 entry_id=entry.entry_id,
                 name_prefix=entry.title,
@@ -178,6 +179,7 @@ async def async_setup_entry(
                         translation_key=SENSOR_TRANSLATION_KEYS.get(key),
                         suggested_precision=precision,
                     ),
+                    device_id=device_id,
                     port=port,
                     entry_id=entry.entry_id,
                     name_prefix=entry.title,
@@ -196,6 +198,7 @@ class RadProSensor(CoordinatorEntity[RadProCoordinator], SensorEntity):
         self,
         coordinator: RadProCoordinator,
         meta: _RadProEntityMeta,
+        device_id: str,
         port: str,
         entry_id: str,
         name_prefix: str,
@@ -205,6 +208,7 @@ class RadProSensor(CoordinatorEntity[RadProCoordinator], SensorEntity):
         Args:
             coordinator: Shared data coordinator.
             meta: Metadata for the command key.
+            device_id: Stable physical counter identifier.
             port: Serial device path.
             entry_id: Config entry ID.
             name_prefix: Device name prefix for the entity.
@@ -226,15 +230,19 @@ class RadProSensor(CoordinatorEntity[RadProCoordinator], SensorEntity):
             self._attr_entity_registry_enabled_default = False
         if meta.suggested_precision is not None:
             self._attr_suggested_display_precision = meta.suggested_precision
+        device_model = "USB"
+        if self.coordinator.data:
+            device_model = str(self.coordinator.data.values.get("deviceModel", "USB"))
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry_id)},
+            identifiers={(DOMAIN, device_id)},
             name=name_prefix,
             manufacturer="Rad Pro",
-            model="USB",
+            model=device_model,
             configuration_url=None,
             suggested_area="Lab",
         )
         self._attr_extra_state_attributes = {
+            "device_id": device_id,
             "port": port,
             "command": self._key,
         }
