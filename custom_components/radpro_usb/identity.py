@@ -173,16 +173,20 @@ def parse_device_id_payload(payload: str) -> dict[str, str]:
     return result
 
 
-def device_title(device_id: str) -> str:
+def device_title(device_id: str, model: str | None = None) -> str:
     """Build a stable config-entry title for a physical counter.
 
     Args:
         device_id: Stable Rad Pro device identifier.
+        model: Optional probed device model used for a friendlier display name.
 
     Returns:
         Human-readable config entry title.
     """
-    return f"Rad Pro ({device_id})"
+    # Normalize whitespace-only model strings so legacy fallback naming stays stable.
+    normalized_model = model.strip() if isinstance(model, str) else ""
+    display_name = normalized_model or "Rad Pro"
+    return f"{display_name} ({device_id})"
 
 
 def describe_entry_updates(
@@ -207,7 +211,8 @@ def describe_entry_updates(
     # Keep transport details mutable while storing the stable physical device ID.
     updated_data["port"] = identity.port
     updated_data["device_id"] = identity.device_id
-    updated_title = device_title(identity.device_id)
+    # Rebuild the title from the resolved identity so repaired entries pick up model names.
+    updated_title = device_title(identity.device_id, model=identity.model)
 
     if (
         updated_data == dict(data)

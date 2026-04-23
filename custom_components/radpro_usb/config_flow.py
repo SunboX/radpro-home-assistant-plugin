@@ -99,7 +99,8 @@ class RadProConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_DEVICE_ID: identity.device_id,
                 }
                 return self.async_create_entry(
-                    title=device_title(identity.device_id),
+                    # Reuse the shared title builder so newly added entries match migrated ones.
+                    title=device_title(identity.device_id, model=identity.model),
                     data=data,
                     options=options,
                 )
