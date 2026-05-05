@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 André Fiedler
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Identity and USB discovery helpers for Rad Pro counters."""
 
 from __future__ import annotations

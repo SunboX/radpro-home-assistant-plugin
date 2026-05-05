@@ -1,0 +1,16 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: radpro-home-assistant-plugin
+Upstream-Contact: André Fiedler / SunboX <https://github.com/SunboX>
+Source: https://github.com/SunboX/radpro-home-assistant-plugin
+
+Files: .reuse/dep5
+Copyright: 2026 André Fiedler
+License: AGPL-3.0-or-later
+
+Files: hacs.json custom_components/radpro_usb/manifest.json custom_components/radpro_usb/strings.json custom_components/radpro_usb/translations/*.json
+Copyright: 2026 André Fiedler
+License: AGPL-3.0-or-later
+
+Files: custom_components/radpro_usb/icon.svg custom_components/radpro_usb/logo.svg custom_components/radpro_usb/brand/*.png
+Copyright: 2026 André Fiedler
+License: CC-BY-SA-4.0

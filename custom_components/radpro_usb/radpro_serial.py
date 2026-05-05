@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 André Fiedler
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Serial client for Rad Pro devices."""
 
 from __future__ import annotations

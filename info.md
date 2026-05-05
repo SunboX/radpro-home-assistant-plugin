@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 André Fiedler
+
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+
 # Rad Pro USB
 
 Home Assistant custom integration for reading Rad Pro devices over USB serial.
@@ -32,3 +38,9 @@ You will be asked for:
 - Whether derived CPS/CPM sensors should be created.
 
 Each added entry represents one physical counter.
+
+## License
+
+The software source code is licensed under GNU Affero General Public License v3.0 or later (`AGPL-3.0-or-later`).
+
+Closed-source, proprietary, or otherwise AGPL-incompatible use requires a separate commercial/proprietary license from the copyright holder.

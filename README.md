@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 André Fiedler
+
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+
 # Rad Pro USB for Home Assistant
 
 Custom Home Assistant integration that reads a Rad Pro device over USB serial and exposes sensor entities similar to the MQTT payloads used by the `radpro-wifi-bridge` project.
@@ -74,9 +80,32 @@ logger:
 ```
 
 ## License
-The code in this repository is licensed under PolyForm Noncommercial 1.0.0.
 
-See [LICENSE.md](LICENSE.md) for the license text and [NOTICE](NOTICE) for the required attribution notice that must be passed along with the software.
+This project is available under two licensing options:
+
+### 1. Open-source license
+
+GNU Affero General Public License v3.0 or later (`AGPL-3.0-or-later`).
+
+You may use, modify, and distribute the software source code under the AGPL. If you modify the software and make it available to users over a network, the AGPL requires that those users can access the corresponding source code of the modified version.
+
+### 2. Commercial/proprietary license
+
+For use in closed-source, proprietary, or otherwise AGPL-incompatible products, a separate commercial/proprietary license is required.
+
+Commercial licensing contact: https://github.com/SunboX
+
+### Documentation and media
+
+Documentation, images, and other non-code media are licensed under Creative Commons Attribution-ShareAlike 4.0 (`CC-BY-SA-4.0`) unless otherwise marked.
+
+### Attribution / notices
+
+Copyright (C) 2026 André Fiedler.
+
+Copyright, license, attribution, and source-origin notices must be preserved as required by the applicable license and the notice files in this repository.
+
+See [LICENSE.md](LICENSE.md), [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md), [NOTICE.md](NOTICE.md), and the machine-readable license texts in [LICENSES/](LICENSES/).
 
 ## Disclaimer
 This integration relies on the Rad Pro serial command interface. If your device uses a different baud rate, adjust the integration options accordingly.

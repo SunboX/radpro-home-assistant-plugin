@@ -1,0 +1,17 @@
+<!--
+SPDX-FileCopyrightText: 2026 André Fiedler
+
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
+
+# Commercial / proprietary licensing
+
+The public license for the software source code in this project is the GNU Affero General Public License v3.0 or later (`AGPL-3.0-or-later`), as stated in the repository `README.md` and license files.
+
+That public license does not grant permission to use this project in closed-source, proprietary, or otherwise AGPL-incompatible products unless the use fully complies with the public license.
+
+A separate commercial/proprietary license may be available from the copyright holder.
+
+Commercial licensing contact: https://github.com/SunboX
+
+This file is only a notice. It is not itself a commercial license grant.
